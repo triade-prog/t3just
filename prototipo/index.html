@@ -35,7 +35,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .logo b{color:var(--accent)}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);letter-spacing:.02em}
 .pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.info{background:var(--info-soft);color:var(--info)}.pill.acc{background:var(--accent-soft);color:var(--accent)}
-.progress{margin-left:auto;font-size:13px;color:var(--muted)}
+.progress{margin-left:auto;font-size:13px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.syncst{font-weight:600}.syncst.ok{color:var(--ok)}.syncst.err{color:var(--bad)}
 nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 nav.tabs a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;padding:10px 12px;border-bottom:3px solid transparent;white-space:nowrap}
 nav.tabs a:hover{color:var(--fg)}
@@ -141,7 +142,7 @@ pre.out{white-space:pre-wrap;word-break:break-word;background:var(--sunk);border
     <div class="brand">
       <span class="logo">T3 <b>Just</b></span>
       <span class="pill warn">Prévia · dados de exemplo</span>
-      <span class="progress" id="progress">0 de 30 perguntas respondidas</span>
+      <span class="progress"><span id="progress">0 de 33 perguntas respondidas</span><span id="sync" class="syncst" hidden></span></span>
     </div>
     <nav class="tabs" id="tabs" aria-label="Telas da prévia"></nav>
   </div>
@@ -406,7 +407,38 @@ const QORDER = ORDER.filter(v=>QS[v]);
 const KEY = "t3just-previa-respostas-v1";
 let A = {};
 try { A = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { A = {}; }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(A)); } catch(e){} updateProgress(); renderOut(); markTabs(); }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(A)); } catch(e){} updateProgress(); renderOut(); markTabs(); queueSync(); }
+
+/* Envio automático para a planilha da Carol (Google Apps Script).
+   Só funciona na versão publicada no GitHub Pages. */
+const ENDPOINT = "";
+const SYNC_ON = !!ENDPOINT && (/github\.io$/.test(location.hostname) || location.hostname === "localhost");
+let syncTimer = null, syncDirty = false;
+function respId(){
+  if(!A.__id){ A.__id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+"-"+Math.random().toString(36).slice(2,10)); try { localStorage.setItem(KEY, JSON.stringify(A)); } catch(e){} }
+  return A.__id;
+}
+function setSync(text, cls){ const s=document.getElementById("sync"); s.hidden=false; s.textContent=text; s.className="syncst "+(cls||""); }
+function payload(){
+  const respostas = {};
+  Object.values(QS).flatMap(s=>s.items).forEach(q=>{ if(q.id!=="nome") respostas[q.id] = A[q.id] || ""; });
+  Object.keys(QS).forEach(v=>{ respostas["notas_"+v] = A["notas_"+v] || ""; });
+  const preenchidas = Object.values(QS).flatMap(s=>s.items).filter(q=>filled(q.id)).length;
+  return JSON.stringify({id:respId(), nome:(A.nome||"").trim(), preenchidas, respostas, texto:document.getElementById("out").textContent});
+}
+function queueSync(){
+  if(!SYNC_ON) return;
+  syncDirty = true; setSync("Salvando…");
+  clearTimeout(syncTimer); syncTimer = setTimeout(sendSync, 2500);
+}
+function sendSync(){
+  if(!SYNC_ON || !syncDirty) return;
+  syncDirty = false;
+  fetch(ENDPOINT, {method:"POST", mode:"no-cors", keepalive:true, headers:{"Content-Type":"text/plain;charset=utf-8"}, body:payload()})
+    .then(()=>{ const h=new Date(); setSync("Enviado para a Carol às "+String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0"), "ok"); })
+    .catch(()=>{ syncDirty = true; setSync("Sem conexão. Tentaremos de novo.", "err"); clearTimeout(syncTimer); syncTimer = setTimeout(sendSync, 15000); });
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden" && syncDirty){ clearTimeout(syncTimer); sendSync(); } });
 const total = Object.values(QS).reduce((n,s)=>n+s.items.length,0);
 function filled(id){ const v=A[id]; return Array.isArray(v)? v.length>0 : !!(v && String(v).trim()); }
 function updateProgress(){ const n=Object.values(QS).flatMap(s=>s.items).filter(q=>filled(q.id)).length; document.getElementById("progress").textContent = n+" de "+total+" perguntas respondidas"; }
@@ -523,6 +555,11 @@ document.getElementById("copybtn").addEventListener("click",()=>{
 });
 
 updateProgress(); renderOut(); markTabs(); show();
+if(SYNC_ON){
+  document.querySelectorAll(".saved").forEach(s=>s.textContent="Salvo e enviado automaticamente para a Carol.");
+  document.getElementById("copymsg").textContent = "Suas respostas já são enviadas automaticamente para a Carol enquanto você responde. Os botões abaixo são opcionais.";
+  setSync("Envio automático ligado", "ok");
+}
 </script>
 
 </body>
