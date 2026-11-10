@@ -411,7 +411,7 @@ function save(){ try { localStorage.setItem(KEY, JSON.stringify(A)); } catch(e){
 
 /* Envio automático para a planilha da Carol (Google Apps Script).
    Só funciona na versão publicada no GitHub Pages. */
-const ENDPOINT = "";
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbx5ovOLR-5YO5QsQCAk1ehUwqpHTgYE9QPF3d22HKmmoCO0mjozrS-mEwPeq36vLlxm/exec";
 const SYNC_ON = !!ENDPOINT && (/github\.io$/.test(location.hostname) || location.hostname === "localhost");
 let syncTimer = null, syncDirty = false;
 function respId(){
