@@ -12,12 +12,13 @@ O projeto está na fase de descoberta. Ainda não há código do sistema. Este r
 | [`docs/02-pesquisa-12-sistemas.md`](docs/02-pesquisa-12-sistemas.md) | Lista consolidada de funcionalidades de 12 sistemas jurídicos nacionais e internacionais |
 | [`docs/03-analise-critica.md`](docs/03-analise-critica.md) | Análise crítica da ideia, preços de concorrentes e próximos passos (10/11/2026) |
 | [`prototipo/index.html`](prototipo/index.html) | Prévia clicável com 6 telas de exemplo e 33 perguntas para a advogada parceira |
+| [`apps-script/`](apps-script/) | Script do Google que grava as respostas da prévia numa planilha, e o passo a passo para ativar |
 
-## Como abrir o protótipo
+## Protótipo
 
-Baixe o repositório e abra `prototipo/index.html` no navegador. Os dados são inventados.
+Link público (depois de ativar o GitHub Pages): https://triade-prog.github.io/t3just/prototipo/
 
-As respostas ficam salvas no navegador de quem responde. Na última página dá para enviar pelo WhatsApp ou copiar o texto. O botão "Salvar arquivo (JSON)" só aparece na versão publicada no Claude.
+Os dados das telas são inventados. As respostas de quem responde são enviadas automaticamente para uma planilha no Google Drive (ver [`apps-script/LEIA-ME.md`](apps-script/LEIA-ME.md)). Também ficam salvas no navegador. Na última página dá para enviar pelo WhatsApp ou copiar o texto.
 
 ## Situação
 
