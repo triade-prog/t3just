@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>Prévia T3 Just</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra superior + abas; cada tela = maquete do sistema (esquerda) + painel de perguntas (direita), empilhando no celular */
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --sunk:#E8ECEA; --line:#D3DAD7;
+  --fg:#16211D; --muted:#5A6863;
+  --accent:#1F5C4A; --accent-soft:#DCEBE5; --on-accent:#FFFFFF;
+  --ok:#2E7D4F; --ok-soft:#DDF0E3; --warn:#9A6200; --warn-soft:#FBEBCB; --bad:#B23A2E; --bad-soft:#F7DEDA; --info:#2D5DA8; --info-soft:#DEE8F7;
+  --ask:#FFF8E6; --ask-line:#E9D7A6;
+  --f-display:"Manrope",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+/* Sempre em cores claras, mesmo com o aparelho no modo escuro */
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.top .wrap{display:flex;flex-direction:column;gap:10px;padding-block:12px 0}
+.brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.01em}
+.logo b{color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);letter-spacing:.02em}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.info{background:var(--info-soft);color:var(--info)}.pill.acc{background:var(--accent-soft);color:var(--accent)}
+.progress{margin-left:auto;font-size:13px;color:var(--muted)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;padding:10px 12px;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a:hover{color:var(--fg)}
+nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs a .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-left:6px;vertical-align:middle}
+main{padding-block:22px 48px}
+.view{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start}
+.view[hidden]{display:none}
+.view.single{grid-template-columns:minmax(0,860px);justify-content:center}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+@media (max-width:960px){.view{grid-template-columns:minmax(0,1fr)}}
+.screen{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}
+.screen-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+.screen-bar h2{font-size:19px}
+.screen-bar .sub{color:var(--muted);font-size:13px;width:100%}
+.screen-body{padding:18px;display:flex;flex-direction:column;gap:18px}
+.explain{background:var(--accent-soft);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:14px}
+.explain strong{color:var(--accent)}
+/* perguntas */
+aside.ask{background:var(--ask);border:1px solid var(--ask-line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 120px);max-height:calc(100vh - 140px);overflow:auto}
+@media (max-width:960px){aside.ask{position:static;max-height:none}}
+aside.ask h3{font-size:16px}
+aside.ask .lead{font-size:13px;color:var(--muted);margin:-10px 0 0}
+.q{display:flex;flex-direction:column;gap:8px}
+.q label.t{font-weight:600;font-size:14px}
+.q textarea,.q input[type=text]{width:100%;font:inherit;font-size:14px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;resize:vertical}
+.q textarea{min-height:64px}
+.q.notes{border-top:1px dashed var(--ask-line);padding-top:16px}
+.q.notes textarea{min-height:140px}
+.q textarea:focus,.q input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip:focus-visible,.btn:focus-visible,nav.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.saved{font-size:12px;color:var(--muted)}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;padding:10px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.nextrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* blocos de maquete */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--sunk);border-radius:10px;padding:12px}
+.kpi .l{font-size:12px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;font-weight:600}
+.kpi .v{font-size:19px;font-weight:500;margin-top:2px}
+.kpi .h{font-size:12px;color:var(--muted)}
+.cols4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.cols4{grid-template-columns:minmax(0,1fr)}}
+.group{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.group>h3{font-size:14px;padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.group>h3 .n{margin-left:auto;font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.item{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;border-left:4px solid transparent}
+.item:last-child{border-bottom:0}
+.item.bad{border-left-color:var(--bad)}.item.warn{border-left-color:var(--warn)}.item.info{border-left-color:var(--info)}.item.ok{border-left-color:var(--ok)}
+.item .t{font-weight:600;font-size:14px}
+.item .m{font-size:13px;color:var(--muted)}
+.item .a{font-size:13px;color:var(--accent);font-weight:600}
+.kanban{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.kcol{background:var(--sunk);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.kcol h3{font-size:13px;display:flex;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.card .t{font-weight:600;font-size:14px}
+.card .m{color:var(--muted)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--sunk);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:720px){.split{grid-template-columns:minmax(0,1fr)}}
+.box{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.box h3{font-size:15px}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+dl.kv dt{color:var(--muted)}dl.kv dd{margin:0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow span.s{padding:5px 10px;border-radius:999px;background:var(--sunk);color:var(--muted);font-weight:600}
+.flow span.s.done{background:var(--ok-soft);color:var(--ok)}
+.flow span.s.now{background:var(--accent);color:var(--on-accent)}
+.flow .ar{color:var(--muted)}
+ul.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}
+ul.check li{display:flex;gap:8px;align-items:baseline}
+ul.check .bx{flex:none;width:15px;height:15px;border:2px solid var(--line);border-radius:4px;transform:translateY(2px)}
+ul.check .bx.on{background:var(--ok);border-color:var(--ok)}
+.split-money{display:flex;height:14px;border-radius:7px;overflow:hidden}
+.split-money i{display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+/* início */
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.hero h1{font-size:clamp(24px,4vw,34px);letter-spacing:-.02em;line-height:1.15}
+.hero p{margin:0;max-width:62ch;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--sunk);border-radius:10px;padding:12px;font-size:14px}
+.step b{display:block;font-family:var(--f-display);font-size:15px;margin-bottom:2px}
+pre.out{white-space:pre-wrap;word-break:break-word;background:var(--sunk);border-radius:10px;padding:14px;font-family:var(--f-body);font-size:14px;margin:0;max-height:520px;overflow:auto}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.view{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="logo">T3 <b>Just</b></span>
+      <span class="pill warn">Prévia · dados de exemplo</span>
+      <span class="progress" id="progress">0 de 30 perguntas respondidas</span>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Telas da prévia"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+<!-- INÍCIO -->
+<section class="view" data-view="inicio" data-title="Início">
+  <div class="hero">
+    <span class="pill acc" style="align-self:flex-start">Para a advogada que acompanha o projeto</span>
+    <h1>Do primeiro atendimento ao honorário recebido, sem perder o controle do trabalho.</h1>
+    <p>Esta é uma prévia do T3 Just, um sistema de gestão para escritórios de advocacia pequenos. Nada aqui funciona de verdade ainda: as telas mostram a ideia, e os clientes, processos e valores são inventados.</p>
+    <p>O que mais ajuda agora é a sua experiência. Em cada tela há perguntas no quadro amarelo. Responda do seu jeito, com exemplos reais do dia a dia (sem nomes de clientes). Leva uns 15 a 20 minutos.</p>
+    <div class="steps">
+      <div class="step"><b>1. Veja a tela</b>Imagine o seu escritório usando aquilo numa segunda-feira de manhã.</div>
+      <div class="step"><b>2. Responda ao lado</b>Não existe resposta errada. "Não sei" e "não uso" também ajudam.</div>
+      <div class="step"><b>3. Envie no final</b>A última aba junta tudo num texto para copiar e mandar para a Carol.</div>
+    </div>
+    <div class="nextrow"><span class="note">Suas respostas ficam salvas neste navegador enquanto você responde.</span><a class="btn" href="#painel">Começar pelo Painel do dia →</a></div>
+  </div>
+  <aside class="ask" data-qs="inicio"></aside>
+</section>
+
+<!-- PAINEL -->
+<section class="view" data-view="painel" data-title="Painel do dia" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>Bom dia, Dra. Paula</h2><span class="pill">Terça, 10 de novembro</span><span class="sub">A primeira tela do sistema. Mostra o que cobrar, acompanhar, entregar e repassar hoje.</span></div>
+    <div class="screen-body">
+      <div class="kpis">
+        <div class="kpi"><div class="l">Recebido no mês</div><div class="v num">R$ 18.350</div><div class="h">de R$ 26.900 previstos</div></div>
+        <div class="kpi"><div class="l">Vencido</div><div class="v num" style="color:var(--bad)">R$ 2.400</div><div class="h">3 parcelas, 2 clientes</div></div>
+        <div class="kpi"><div class="l">A repassar</div><div class="v num" style="color:var(--warn)">R$ 12.600</div><div class="h">1 cliente</div></div>
+        <div class="kpi"><div class="l">Contratos novos</div><div class="v num">4</div><div class="h">de 11 atendimentos</div></div>
+      </div>
+      <div class="cols4">
+        <div class="group"><h3><span class="pill bad">Cobrar</span><span class="n">2</span></h3>
+          <div class="item bad"><span class="t">Maria Souza · parcela 3/10 vencida</span><span class="m num">R$ 800,00 · venceu há 5 dias</span><span class="a">Enviar lembrete pelo WhatsApp</span></div>
+          <div class="item warn"><span class="t">Roberto Alves · parcela 2/6 vence amanhã</span><span class="m num">R$ 1.200,00</span><span class="a">Ver contrato</span></div>
+        </div>
+        <div class="group"><h3><span class="pill info">Acompanhar</span><span class="n">2</span></h3>
+          <div class="item info"><span class="t">Ana Lima · proposta sem resposta</span><span class="m">Enviada há 6 dias · Revisão de aposentadoria</span><span class="a">Registrar novo contato</span></div>
+          <div class="item info"><span class="t">Carlos Mendes · consulta amanhã, 10h</span><span class="m">Veio por indicação · Trabalhista</span><span class="a">Ver atendimento</span></div>
+        </div>
+        <div class="group"><h3><span class="pill acc">Entregar</span><span class="n">2</span></h3>
+          <div class="item bad"><span class="t">Prazo: réplica · Roberto Alves</span><span class="m">Vence em 2 dias · Responsável: Dr. Henrique</span><span class="a">Abrir caso</span></div>
+          <div class="item warn"><span class="t">Parado: falta CNIS de João Pereira</span><span class="m">Aguardando o cliente há 8 dias</span><span class="a">Pedir de novo ao cliente</span></div>
+        </div>
+        <div class="group"><h3><span class="pill warn">Repassar</span><span class="n">1</span></h3>
+          <div class="item warn"><span class="t">João Pereira · RPV recebida</span><span class="m num">Recebido R$ 18.000 · honorários R$ 5.400 · cliente R$ 12.600</span><span class="a">Registrar repasse</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <aside class="ask" data-qs="painel"></aside>
+</section>
+
+<!-- ATENDIMENTOS -->
+<section class="view" data-view="atendimentos" data-title="Atendimentos" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>Atendimentos e propostas</h2><span class="sub">Cada pessoa que procura o escritório vira um cartão. Ele anda pelas colunas até virar contrato ou ser perdido.</span></div>
+    <div class="screen-body">
+      <div class="kanban">
+        <div class="kcol"><h3>Novo contato <span class="num">3</span></h3>
+          <div class="card"><span class="t">Fernanda Rocha</span><span class="m">Pensão alimentícia</span><span class="pill">Instagram</span></div>
+          <div class="card"><span class="t">Sr. Antônio</span><span class="m">BPC/LOAS para a mãe</span><span class="pill">Indicação</span></div>
+          <div class="card"><span class="t">Luiz Gomes</span><span class="m">Rescisão sem pagamento</span><span class="pill">Google</span></div>
+        </div>
+        <div class="kcol"><h3>Consulta marcada <span class="num">1</span></h3>
+          <div class="card"><span class="t">Carlos Mendes</span><span class="m">Horas extras · amanhã 10h</span><span class="pill">Indicação</span></div>
+        </div>
+        <div class="kcol"><h3>Proposta enviada <span class="num">2</span></h3>
+          <div class="card"><span class="t">Ana Lima</span><span class="m">Revisão de aposentadoria</span><span class="num">R$ 1.000 + 30% êxito</span><span class="pill warn">6 dias sem resposta</span></div>
+          <div class="card"><span class="t">Paulo Nunes</span><span class="m">Inventário</span><span class="num">R$ 9.000 em 6x</span></div>
+        </div>
+        <div class="kcol"><h3>Fechado <span class="num">4</span></h3>
+          <div class="card"><span class="t">Maria Souza</span><span class="m">Divórcio consensual</span><span class="num">R$ 8.000 em 10x</span><span class="pill ok">Contrato criado</span></div>
+          <div class="card"><span class="t">João Pereira</span><span class="m">Aposentadoria</span><span class="num">R$ 1.500 + 30%</span><span class="pill ok">Contrato criado</span></div>
+        </div>
+        <div class="kcol"><h3>Perdido <span class="num">2</span></h3>
+          <div class="card"><span class="t">Juliana Prado</span><span class="m">Motivo: achou caro</span></div>
+          <div class="card"><span class="t">Marcos Lima</span><span class="m">Motivo: sem retorno</span></div>
+        </div>
+      </div>
+      <div class="explain"><strong>A ideia:</strong> ninguém fica esquecido. Se uma proposta passa de 5 dias sem resposta, ela aparece no Painel do dia para alguém retomar o contato. No fim do mês dá para ver de onde vêm os clientes que fecham.</div>
+    </div>
+  </div>
+  <aside class="ask" data-qs="atendimentos"></aside>
+</section>
+
+<!-- CONTRATO -->
+<section class="view" data-view="contrato" data-title="Contratos" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>Contratos e honorários</h2><span class="sub">Dois exemplos com formas de cobrança diferentes. Ao salvar o contrato, o sistema já cria as parcelas e as primeiras tarefas.</span></div>
+    <div class="screen-body">
+      <div class="split">
+        <div class="box">
+          <h3>Maria Souza · Divórcio consensual</h3>
+          <dl class="kv"><dt>Honorários</dt><dd class="num">R$ 8.000 em 10x de R$ 800</dd><dt>Vencimento</dt><dd>Todo dia 5</dd><dt>Responsável</dt><dd>Dra. Paula</dd><dt>Situação</dt><dd><span class="pill bad">1 parcela vencida</span></dd></dl>
+          <div class="tablewrap"><table style="min-width:0"><thead><tr><th>Parcela</th><th>Vencimento</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>
+            <tr><td class="num">1/10</td><td class="num">05/09</td><td class="r num">800,00</td><td><span class="pill ok">Pago</span></td></tr>
+            <tr><td class="num">2/10</td><td class="num">05/10</td><td class="r num">800,00</td><td><span class="pill ok">Pago</span></td></tr>
+            <tr><td class="num">3/10</td><td class="num">05/11</td><td class="r num">800,00</td><td><span class="pill bad">Vencido</span></td></tr>
+            <tr><td class="num">4/10</td><td class="num">05/12</td><td class="r num">800,00</td><td><span class="pill">A vencer</span></td></tr>
+          </tbody></table></div>
+          <span class="note">+ 6 parcelas até 05/06</span>
+        </div>
+        <div class="box">
+          <h3>João Pereira · Aposentadoria</h3>
+          <dl class="kv"><dt>Entrada</dt><dd class="num">R$ 1.500 <span class="pill ok">Pago</span></dd><dt>Êxito</dt><dd class="num">30% dos atrasados</dd><dt>Responsável</dt><dd>Dr. Henrique</dd><dt>Situação</dt><dd><span class="pill warn">Repasse pendente</span></dd></dl>
+          <div class="explain" style="font-size:13px">O êxito só vira dinheiro previsto quando sai a RPV ou o alvará. Antes disso ele aparece como <strong>"possível"</strong>, separado do que é certo.</div>
+          <div><div class="split-money" aria-label="Divisão da RPV"><i style="width:30%;background:var(--accent)"></i><i style="width:70%;background:var(--warn)"></i></div>
+          <div class="legend" style="margin-top:6px"><span><b style="background:var(--accent)"></b>Honorários R$ 5.400</span><span><b style="background:var(--warn)"></b>Do cliente R$ 12.600</span></div></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Ao salvar um contrato, o T3 Just cria sozinho:</h3>
+        <ul class="check">
+          <li><span class="bx on"></span>As parcelas no financeiro, com vencimento e lembrete</li>
+          <li><span class="bx on"></span>O caso ligado ao contrato, com o responsável</li>
+          <li><span class="bx on"></span>A lista de documentos para pedir ao cliente</li>
+          <li><span class="bx"></span>O contrato em PDF a partir do seu modelo (ideia para depois)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <aside class="ask" data-qs="contrato"></aside>
+</section>
+
+<!-- FINANCEIRO -->
+<section class="view" data-view="financeiro" data-title="Financeiro" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>Financeiro · novembro</h2><span class="sub">Entradas e saídas do escritório, separando o que é do escritório do que é dinheiro do cliente.</span></div>
+    <div class="screen-body">
+      <div class="kpis">
+        <div class="kpi"><div class="l">Entrou</div><div class="v num">R$ 18.350</div><div class="h">só honorários</div></div>
+        <div class="kpi"><div class="l">Saiu</div><div class="v num">R$ 7.980</div><div class="h">despesas do mês</div></div>
+        <div class="kpi"><div class="l">Sobrou</div><div class="v num" style="color:var(--ok)">R$ 10.370</div><div class="h">antes de impostos</div></div>
+        <div class="kpi"><div class="l">Do cliente, em caixa</div><div class="v num" style="color:var(--warn)">R$ 12.600</div><div class="h">não é do escritório</div></div>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Ligado a</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>
+        <tr><td class="num">03/11</td><td>RPV recebida</td><td>João Pereira · Aposentadoria</td><td class="r num">18.000,00</td><td><span class="pill warn">Repassar R$ 12.600</span></td></tr>
+        <tr><td class="num">05/11</td><td>Parcela 3/10</td><td>Maria Souza · Divórcio</td><td class="r num">800,00</td><td><span class="pill bad">Vencido</span></td></tr>
+        <tr><td class="num">06/11</td><td>Consulta</td><td>Carlos Mendes</td><td class="r num">300,00</td><td><span class="pill ok">Recebido · Pix</span></td></tr>
+        <tr><td class="num">08/11</td><td>Custas iniciais</td><td>Paulo Nunes · Inventário</td><td class="r num" style="color:var(--bad)">−420,00</td><td><span class="pill">Cobrar do cliente</span></td></tr>
+        <tr><td class="num">10/11</td><td>Aluguel da sala</td><td>Escritório</td><td class="r num" style="color:var(--bad)">−2.300,00</td><td><span class="pill ok">Pago</span></td></tr>
+        <tr><td class="num">10/11</td><td>Contador</td><td>Escritório</td><td class="r num" style="color:var(--bad)">−650,00</td><td><span class="pill ok">Pago</span></td></tr>
+        <tr><td class="num">15/11</td><td>Parcela 2/6</td><td>Roberto Alves · Trabalhista</td><td class="r num">1.200,00</td><td><span class="pill">A vencer</span></td></tr>
+      </tbody></table></div>
+      <div class="explain"><strong>Regra do sistema:</strong> contrato assinado não é dinheiro recebido, e dinheiro do cliente não é lucro. Por isso o "Sobrou" nunca inclui valores que ainda precisam ser repassados.</div>
+    </div>
+  </div>
+  <aside class="ask" data-qs="financeiro"></aside>
+</section>
+
+<!-- CASO -->
+<section class="view" data-view="caso" data-title="Casos e tarefas" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>João Pereira · Aposentadoria por tempo de contribuição</h2><span class="pill acc">Responsável: Dr. Henrique</span><span class="sub">O caso mostra em que etapa está, o que falta, quem precisa agir e o histórico.</span></div>
+    <div class="screen-body">
+      <div class="flow"><span class="s done">Documentos</span><span class="ar">→</span><span class="s done">Pedido no INSS</span><span class="ar">→</span><span class="s done">Ação judicial</span><span class="ar">→</span><span class="s now">RPV / pagamento</span><span class="ar">→</span><span class="s">Repasse e encerramento</span></div>
+      <div class="split">
+        <div class="box"><h3>Tarefas</h3>
+          <ul class="check">
+            <li><span class="bx"></span><span>Registrar repasse ao cliente · <span class="note">Dra. Paula · até 12/11</span></span></li>
+            <li><span class="bx"></span><span>Pedir CNIS atualizado ao cliente · <span class="note">Secretaria · atrasada</span></span></li>
+            <li><span class="bx on"></span><span>Conferir valor da RPV · <span class="note">Dr. Henrique · feito 04/11</span></span></li>
+          </ul>
+        </div>
+        <div class="box"><h3>Documentos do cliente</h3>
+          <ul class="check">
+            <li><span class="bx on"></span>RG e CPF</li>
+            <li><span class="bx on"></span>Carteira de trabalho</li>
+            <li><span class="bx"></span>CNIS atualizado <span class="pill warn">pedido há 8 dias</span></li>
+            <li><span class="bx"></span>Dados bancários para o repasse</li>
+          </ul>
+        </div>
+      </div>
+      <div class="box"><h3>Histórico</h3>
+        <dl class="kv"><dt class="num">03/11</dt><dd>RPV paga: R$ 18.000 (registrado no financeiro)</dd><dt class="num">21/10</dt><dd>Expedida RPV</dd><dt class="num">02/09</dt><dd>Sentença de procedência</dd></dl>
+        <span class="note">Na primeira versão os andamentos são lançados à mão. A leitura automática das publicações dos tribunais ficaria para uma etapa seguinte.</span>
+      </div>
+    </div>
+  </div>
+  <aside class="ask" data-qs="caso"></aside>
+</section>
+
+<!-- PARA FECHAR -->
+<section class="view" data-view="fechar" data-title="Para fechar" hidden>
+  <div class="hero">
+    <span class="pill acc" style="align-self:flex-start">Quase lá</span>
+    <h1>Obrigada por ver todas as telas.</h1>
+    <p>Faltam só três perguntas sobre valor e uso no dia a dia. Responda no quadro ao lado e, se quiser, deixe suas anotações finais.</p>
+    <p>Na próxima página você confere tudo o que respondeu e envia para a Carol pelo WhatsApp.</p>
+  </div>
+  <aside class="ask" data-qs="fechar"></aside>
+</section>
+
+<!-- RESPOSTAS -->
+<section class="view single" data-view="respostas" data-title="Suas respostas" hidden>
+  <div class="screen">
+    <div class="screen-bar"><h2>Suas respostas</h2><span class="sub">Tudo o que você respondeu, organizado por tela. Confira e envie para a Carol.</span></div>
+    <div class="screen-body">
+      <div class="actions">
+        <a class="btn" id="zapbtn" href="https://wa.me/" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+        <button class="btn ghost" id="jsonbtn" type="button">Salvar arquivo (JSON)</button>
+        <button class="btn ghost" id="copybtn" type="button">Copiar texto</button>
+      </div>
+      <p class="note" id="copymsg">O WhatsApp abre com o texto pronto. Escolha a conversa com a Carol e toque em enviar. Se preferir mandar o arquivo, salve o JSON e anexe na conversa.</p>
+      <pre class="out" id="out" tabindex="0"></pre>
+      <div class="nextrow"><a class="btn ghost" href="#fechar">← Voltar para Para fechar</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const QS = {
+  inicio:{title:"Para começar",lead:"Sobre você e o escritório.",items:[
+    {id:"nome",t:"Seu nome",type:"line"},
+    {id:"area",t:"Em quais áreas você atua?",type:"multi",opts:["Previdenciário","Trabalhista","Família","Cível","Consumidor","Empresarial","Tributário","Criminal","Outra"]},
+    {id:"pessoas",t:"Quantas pessoas trabalham no escritório, contando você?",type:"one",opts:["Só eu","2 a 3","4 a 6","7 a 10","Mais de 10"]},
+    {id:"hoje",t:"Hoje, onde você controla clientes, prazos e dinheiro?",type:"multi",opts:["Planilha","Caderno ou agenda","WhatsApp","Na cabeça","O contador cuida","Outro sistema"]},
+    {id:"dor",t:"O que mais te dá dor de cabeça na gestão do escritório?",type:"text"}]},
+  painel:{title:"Sobre o Painel do dia",lead:"Imagine abrir esta tela toda manhã.",items:[
+    {id:"p_primeiro",t:"O que você olharia primeiro aqui? E o que ignoraria?",type:"text"},
+    {id:"p_falta",t:"Falta alguma coisa que você precisa saber logo cedo?",type:"text"},
+    {id:"p_estranho",t:"Algo nesta tela não faz sentido para a realidade de um escritório?",type:"text"},
+    {id:"p_onde",t:"Onde você usaria mais?",type:"one",opts:["Computador","Celular","Os dois"]},
+    {id:"p_zap",t:"Gostaria de receber esse resumo do dia pelo WhatsApp?",type:"one",opts:["Sim","Talvez","Não"]}]},
+  atendimentos:{title:"Sobre atendimentos",lead:"Da primeira mensagem até o contrato assinado.",items:[
+    {id:"a_origem",t:"Como os clientes costumam chegar até você?",type:"multi",opts:["Indicação","Instagram","Google","WhatsApp direto","Sindicato ou associação","Parceiros","Outro"]},
+    {id:"a_quem",t:"Quem faz o primeiro atendimento? Como é esse primeiro contato?",type:"text"},
+    {id:"a_proposta",t:"Você faz proposta de honorários por escrito? Cobra a consulta?",type:"text"},
+    {id:"a_perde",t:"Por que um cliente desiste depois do primeiro contato?",type:"text"},
+    {id:"a_util",t:"Esta tela de colunas ajudaria no seu dia a dia?",type:"one",opts:["Muito","Um pouco","Não"]}]},
+  contrato:{title:"Sobre contratos e honorários",lead:"Esta parte é a mais importante para nós.",items:[
+    {id:"c_formas",t:"Quais formas de honorário você usa?",type:"multi",opts:["Fixo à vista","Fixo parcelado","Êxito (%)","Entrada + êxito","Mensalidade (partido)","Por hora","Sucumbência"]},
+    {id:"c_mais",t:"Qual delas é a mais comum no seu escritório? Dê um exemplo típico de valores.",type:"text"},
+    {id:"c_esqueceu",t:"Já aconteceu de esquecer de cobrar uma parcela ou um êxito? Conte como foi.",type:"text"},
+    {id:"c_parceiro",t:"Você divide honorários com parceiros ou correspondentes? Como faz a conta?",type:"text"},
+    {id:"c_registro",t:"Hoje, onde fica registrado o que foi combinado com o cliente?",type:"text"}]},
+  financeiro:{title:"Sobre o financeiro",lead:"Dinheiro do escritório e dinheiro do cliente.",items:[
+    {id:"f_conta",t:"A conta do escritório é separada da sua conta pessoal?",type:"one",opts:["Sim","Não","Em parte"]},
+    {id:"f_meios",t:"Como os clientes pagam?",type:"multi",opts:["Pix","Boleto","Cartão","Dinheiro","Transferência","Desconto no alvará/RPV"]},
+    {id:"f_repasse",t:"Quando entra alvará ou RPV, como você faz e registra o repasse ao cliente?",type:"text"},
+    {id:"f_nota",t:"Você emite nota fiscal dos honorários? Quem cuida disso?",type:"text"},
+    {id:"f_numero",t:"Que número você queria saber todo mês e hoje não sabe?",type:"text"}]},
+  caso:{title:"Sobre casos e prazos",lead:"A rotina do trabalho jurídico.",items:[
+    {id:"k_prazos",t:"Como você controla prazos e audiências hoje?",type:"text"},
+    {id:"k_qtd",t:"Quantos processos ou casos ativos, mais ou menos?",type:"one",opts:["Até 30","30 a 100","100 a 300","Mais de 300"]},
+    {id:"k_pub",t:"Ler as publicações dos tribunais automaticamente é…",type:"one",opts:["Essencial desde o início","Seria bom","Não preciso"]},
+    {id:"k_docs",t:"Quanto tempo se perde esperando documentos do cliente? Como você cobra isso?",type:"text"},
+    {id:"k_cliente",t:"Com que frequência o cliente pergunta \"como está meu processo?\" e quem responde?",type:"text"}]},
+  fechar:{title:"Para fechar",lead:"Últimas três perguntas.",items:[
+    {id:"z_pagaria",t:"Um sistema assim, quanto seria justo pagar por mês para o escritório todo?",type:"one",opts:["Até R$ 100","R$ 100 a 200","R$ 200 a 400","Mais de R$ 400","Não sei"]},
+    {id:"z_desistir",t:"O que faria você desistir de usar um sistema depois de algumas semanas?",type:"text"},
+    {id:"z_mais",t:"Mais alguma coisa que a gente precisa saber?",type:"text"}]}
+};
+const ORDER = ["inicio","painel","atendimentos","contrato","financeiro","caso","fechar","respostas"];
+const QORDER = ORDER.filter(v=>QS[v]);
+const KEY = "t3just-previa-respostas-v1";
+let A = {};
+try { A = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { A = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(A)); } catch(e){} updateProgress(); renderOut(); markTabs(); }
+const total = Object.values(QS).reduce((n,s)=>n+s.items.length,0);
+function filled(id){ const v=A[id]; return Array.isArray(v)? v.length>0 : !!(v && String(v).trim()); }
+function updateProgress(){ const n=Object.values(QS).flatMap(s=>s.items).filter(q=>filled(q.id)).length; document.getElementById("progress").textContent = n+" de "+total+" perguntas respondidas"; }
+function el(tag, attrs={}, kids=[]){ const e=document.createElement(tag); for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } kids.forEach(c=>e.appendChild(c)); return e; }
+
+document.querySelectorAll("aside.ask").forEach(box=>{
+  const s = QS[box.dataset.qs];
+  box.appendChild(el("h3",{text:s.title}));
+  box.appendChild(el("p",{class:"lead",text:s.lead}));
+  s.items.forEach(q=>{
+    const wrap = el("div",{class:"q"});
+    const lab = el("label",{class:"t",for:"q-"+q.id,text:q.t});
+    wrap.appendChild(lab);
+    if(q.type==="text"||q.type==="line"){
+      const inp = q.type==="text" ? el("textarea",{id:"q-"+q.id,rows:"3"}) : el("input",{id:"q-"+q.id,type:"text",autocomplete:"name"});
+      inp.value = A[q.id]||"";
+      inp.addEventListener("input",()=>{ A[q.id]=inp.value; save(); });
+      wrap.appendChild(inp);
+    } else {
+      lab.removeAttribute("for"); lab.id="l-"+q.id;
+      const chips = el("div",{class:"chips",role:"group","aria-labelledby":"l-"+q.id,id:"q-"+q.id});
+      q.opts.forEach(o=>{
+        const cur = A[q.id];
+        const on = q.type==="multi" ? Array.isArray(cur)&&cur.includes(o) : cur===o;
+        const b = el("button",{type:"button",class:"chip","aria-pressed":String(on),text:o});
+        b.addEventListener("click",()=>{
+          if(q.type==="multi"){ let arr=Array.isArray(A[q.id])?A[q.id]:[]; arr = arr.includes(o)? arr.filter(x=>x!==o) : arr.concat(o); A[q.id]=arr; b.setAttribute("aria-pressed",String(arr.includes(o))); }
+          else { A[q.id] = A[q.id]===o ? "" : o; chips.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.textContent===A[q.id]))); }
+          save();
+        });
+        chips.appendChild(b);
+      });
+      wrap.appendChild(chips);
+    }
+    box.appendChild(wrap);
+  });
+  const nid = "notas_"+box.dataset.qs;
+  const nwrap = el("div",{class:"q notes"});
+  nwrap.appendChild(el("label",{class:"t",for:"q-"+nid,text:"Anotações livres"}));
+  nwrap.appendChild(el("span",{class:"note",text:"Escreva aqui qualquer ideia, crítica ou observação sobre esta parte do sistema."}));
+  const nta = el("textarea",{id:"q-"+nid,rows:"6"});
+  nta.value = A[nid]||"";
+  nta.addEventListener("input",()=>{ A[nid]=nta.value; save(); });
+  nwrap.appendChild(nta);
+  box.appendChild(nwrap);
+  const i = ORDER.indexOf(box.dataset.qs);
+  if(i < ORDER.length-1){
+    const nxt = ORDER[i+1];
+    const title = document.querySelector('[data-view="'+nxt+'"]').dataset.title;
+    box.appendChild(el("a",{class:"btn",href:"#"+nxt,text:"Próxima: "+title+" →"}));
+  }
+  box.appendChild(el("span",{class:"saved",text:"Salvo automaticamente neste navegador."}));
+});
+
+const tabs = document.getElementById("tabs");
+ORDER.forEach(v=>{
+  const a = el("a",{href:"#"+v,"data-tab":v,text:document.querySelector('[data-view="'+v+'"]').dataset.title});
+  tabs.appendChild(a);
+});
+function markTabs(){
+  tabs.querySelectorAll("a").forEach(a=>{
+    const s = QS[a.dataset.tab]; if(!s) return; const done = s.items.some(q=>filled(q.id));
+    const d = a.querySelector(".dot");
+    if(done && !d) a.appendChild(el("span",{class:"dot","aria-label":"respondida"}));
+    if(!done && d) d.remove();
+  });
+}
+function show(){
+  let v = (location.hash||"").slice(1); if(!ORDER.includes(v)) v="inicio";
+  document.querySelectorAll(".view").forEach(s=>s.hidden = s.dataset.view!==v);
+  tabs.querySelectorAll("a").forEach(a=>{ if(a.dataset.tab===v){ a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",show);
+
+function renderOut(){
+  const lines = ["Respostas sobre a prévia do T3 Just", A.nome? "De: "+A.nome : "", ""];
+  QORDER.forEach(v=>{
+    const s = QS[v];
+    lines.push("== "+document.querySelector('[data-view="'+v+'"]').dataset.title.toUpperCase()+" ==");
+    s.items.forEach(q=>{ if(q.id==="nome") return; const val = Array.isArray(A[q.id]) ? A[q.id].join(", ") : (A[q.id]||"").trim(); lines.push("• "+q.t); lines.push("  "+(val||"(sem resposta)")); });
+    const nv = (A["notas_"+v]||"").trim();
+    if(nv){ lines.push("• Anotações livres"); lines.push("  "+nv); }
+    lines.push("");
+  });
+  const txt = lines.filter((l,i)=>!(i===1&&!l)).join("\n");
+  document.getElementById("out").textContent = txt;
+  document.getElementById("zapbtn").href = "https://wa.me/?text=" + encodeURIComponent(txt);
+}
+function buildJSON(){
+  const telas = {};
+  QORDER.forEach(v=>{
+    const s = QS[v];
+    const respostas = s.items.filter(q=>q.id!=="nome").map(q=>({id:q.id, pergunta:q.t, resposta: Array.isArray(A[q.id]) ? A[q.id] : (A[q.id]||"").trim()}));
+    telas[v] = {tela: document.querySelector('[data-view="'+v+'"]').dataset.title, respostas, anotacoes:(A["notas_"+v]||"").trim()};
+  });
+  return JSON.stringify({projeto:"T3 Just", documento:"Respostas da prévia", versao_previa:3, gerado_em:new Date().toISOString(), nome:(A.nome||"").trim(), telas}, null, 2);
+}
+(async()=>{
+  const jb = document.getElementById("jsonbtn"), msg = document.getElementById("copymsg");
+  let dl = null;
+  try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch(e){ dl = null; }
+  if(!dl){ jb.hidden = true; return; }
+  jb.addEventListener("click", async()=>{
+    const nome = (A.nome||"advogada").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "advogada";
+    try { await dl.save({filename:"t3-just-respostas-"+nome+".json", data:buildJSON()}); msg.textContent = "Arquivo salvo. Agora é só anexar na conversa com a Carol no WhatsApp."; }
+    catch(e){ msg.textContent = e && e.code==="declined" ? "O arquivo não foi salvo. Você pode tentar de novo ou usar o botão do WhatsApp." : "Não foi possível salvar o arquivo aqui. Use o botão do WhatsApp ou copie o texto."; }
+  });
+})();
+document.getElementById("copybtn").addEventListener("click",()=>{
+  const txt = document.getElementById("out").textContent; const msg = document.getElementById("copymsg");
+  const fallback = ()=>{ const r=document.createRange(); r.selectNodeContents(document.getElementById("out")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); msg.textContent="Texto selecionado. Use Ctrl+C (ou Copiar no celular)."; };
+  try { navigator.clipboard.writeText(txt).then(()=>{ msg.textContent="Texto copiado. Agora é só colar na conversa com a Carol."; }, fallback); } catch(e){ fallback(); }
+});
+
+updateProgress(); renderOut(); markTabs(); show();
+</script>
+
+</body>
+</html>
